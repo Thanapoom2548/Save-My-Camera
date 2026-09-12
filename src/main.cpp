@@ -1,0 +1,268 @@
+#include <Arduino.h>
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+#include <DHT.h>
+#include <Preferences.h>
+
+#define BTN_MODE_PIN 18
+#define BTN_SAVE_PIN 19
+#define POT_PIN 35
+#define TRIG_PIN 33
+#define ECHO_PIN 34
+#define DHT_PIN 4
+#define LED_RED 25
+#define LED_YELLOW 26
+#define LED_GREEN 27
+#define BUZZER_PIN 14
+
+#define SCREEN_WIDTH 128
+#define SCREEN_HEIGHT 64
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
+
+#define DHTTYPE DHT11
+DHT dht(DHT_PIN, DHTTYPE);
+Preferences preferences;
+
+enum State { NORMAL, SET_DIST, SET_TEMP, SET_HUM_MIN, SET_HUM_MAX, SET_DELAY };
+State currentState = NORMAL;
+
+int savedDist, savedTemp, savedHumMin, savedHumMax, savedDelayMins;
+unsigned long cameraDetectedTime = 0;
+bool isCameraInCabinet = false;
+bool isMuted = false;
+
+unsigned long lastDebounceTime_Mode = 0;
+unsigned long lastDebounceTime_Save = 0;
+bool lastModeState = HIGH;
+bool lastSaveState = HIGH;
+const int debounceDelay = 50;
+
+unsigned long lastPingTime = 0;
+long currentDist = 999;
+
+long getDistance() {
+  digitalWrite(TRIG_PIN, LOW);
+  delayMicroseconds(2);
+  digitalWrite(TRIG_PIN, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(TRIG_PIN, LOW);
+  long duration = pulseIn(ECHO_PIN, HIGH, 30000); 
+  if (duration == 0) return 999; 
+  return duration * 0.034 / 2;
+}
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(BTN_MODE_PIN, INPUT_PULLUP);
+  pinMode(BTN_SAVE_PIN, INPUT_PULLUP);
+  pinMode(TRIG_PIN, OUTPUT);
+  pinMode(ECHO_PIN, INPUT);
+  pinMode(LED_RED, OUTPUT);
+  pinMode(LED_YELLOW, OUTPUT);
+  pinMode(LED_GREEN, OUTPUT);
+  pinMode(BUZZER_PIN, OUTPUT);
+
+  dht.begin();
+  if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
+    for(;;);
+  }
+  
+  preferences.begin("cabinet", false);
+  
+  // *** คำสั่งล้างความจำเก่า ป้องกันค่ารวน (สำคัญมาก) ***
+  preferences.clear(); 
+  
+  savedDist = preferences.getInt("dist", 50); 
+  savedTemp = preferences.getInt("temp", 50);     
+  savedHumMin = preferences.getInt("humMin", 20); 
+  savedHumMax = preferences.getInt("humMax", 85); 
+  savedDelayMins = preferences.getInt("delay", 1); // ค่าเริ่มต้น 1 นาที
+}
+
+void loop() {
+  // ปุ่ม Mode
+  bool readingMode = digitalRead(BTN_MODE_PIN);
+  if (readingMode != lastModeState) lastDebounceTime_Mode = millis();
+  if ((millis() - lastDebounceTime_Mode) > debounceDelay) {
+    if (readingMode == LOW) {
+      currentState = (State)((currentState + 1) % 6);
+      digitalWrite(LED_RED, LOW); digitalWrite(LED_YELLOW, LOW); digitalWrite(LED_GREEN, LOW);
+      noTone(BUZZER_PIN); 
+      digitalWrite(BUZZER_PIN, LOW);
+      delay(200);
+    }
+  }
+  lastModeState = readingMode;
+
+  // ปุ่ม Save
+  bool readingSave = digitalRead(BTN_SAVE_PIN);
+  if (readingSave != lastSaveState) lastDebounceTime_Save = millis();
+  bool savePressed = false;
+  if ((millis() - lastDebounceTime_Save) > debounceDelay) {
+    if (readingSave == LOW) {
+      savePressed = true;
+      delay(200);
+    }
+  }
+  lastSaveState = readingSave;
+
+  // อ่าน Ultrasonic (ทุกๆ 100ms)
+  if (millis() - lastPingTime > 100) {
+    currentDist = getDistance();
+    lastPingTime = millis();
+  }
+  
+  float t = dht.readTemperature();
+  float h = dht.readHumidity();
+  int potValue = analogRead(POT_PIN);
+
+  display.clearDisplay();
+  display.setTextSize(1);
+  display.setTextColor(WHITE);
+  display.setCursor(0, 0);
+
+  switch (currentState) {
+    case NORMAL: {
+      if (isnan(t) || isnan(h)) {
+        digitalWrite(LED_YELLOW, HIGH);
+        display.println("--- SENSOR ERROR ---");
+        display.display();
+        return; 
+      }
+
+      int triggerDistance = savedDist - 5; 
+
+      if (currentDist <= triggerDistance && currentDist > 0) { 
+        if (!isCameraInCabinet) {
+          isCameraInCabinet = true;
+          cameraDetectedTime = millis();
+          isMuted = false;
+        }
+      } else {
+        isCameraInCabinet = false;
+        digitalWrite(LED_GREEN, LOW); digitalWrite(LED_RED, LOW); digitalWrite(LED_YELLOW, LOW);
+        noTone(BUZZER_PIN); digitalWrite(BUZZER_PIN, LOW); 
+      }
+
+      display.println("VER: 3.0 (RESET)"); // เช็คว่าอัปโหลดติด
+      display.print("T: "); display.print(t, 1); display.print("C  H: "); display.print(h, 1); display.println("%");
+      
+      if (isCameraInCabinet) {
+        unsigned long elapsedMillis = millis() - cameraDetectedTime;
+        unsigned long delayTargetMillis = savedDelayMins * 60000UL;
+        
+        unsigned long totalSecs = elapsedMillis / 1000;
+        display.print("Time: "); display.print(totalSecs / 60); display.print("m "); 
+        display.print(totalSecs % 60); display.println("s");
+
+        if (elapsedMillis < delayTargetMillis) {
+           digitalWrite(LED_GREEN, HIGH);
+           noTone(BUZZER_PIN); digitalWrite(BUZZER_PIN, LOW); // บังคับดับเสียงชัวร์ๆ
+           display.print("Delay: ");
+           display.print((delayTargetMillis - elapsedMillis) / 1000); display.println(" s");
+        } else {
+           bool isAlarm = (t >= savedTemp || h >= savedHumMax || h <= savedHumMin);
+           
+           if (isAlarm) {
+             digitalWrite(LED_GREEN, LOW); digitalWrite(LED_RED, HIGH);
+             if (savePressed) isMuted = true;
+             
+             if (!isMuted) tone(BUZZER_PIN, 1000); 
+             else { noTone(BUZZER_PIN); digitalWrite(BUZZER_PIN, LOW); }
+             
+             display.println("! ALARM ACTIVE !");
+           } else {
+             digitalWrite(LED_GREEN, HIGH); digitalWrite(LED_RED, LOW);
+             noTone(BUZZER_PIN); digitalWrite(BUZZER_PIN, LOW);
+             display.println("Status: SAFE");
+           }
+        }
+      } else {
+        display.println("Status: NO CAMERA");
+      }
+      break;
+    }
+    case SET_DIST: {
+      // แก้ 4095 ลงมา 0 เพื่อให้หมุนขวา = เพิ่มขึ้น
+      int mappedDist = map(potValue, 4095, 0, 10, 100);
+      display.println("SET DISTANCE");
+      display.print("New: "); display.print(mappedDist); 
+      display.print(" (Raw:"); display.print(potValue); display.println(")"); 
+      display.print("Real: "); display.println(currentDist);
+      
+      // ถ้าหมุนตรงระยะ ให้ติดไฟทั้ง 3 ดวงเช็คหลอดขาด
+      if (currentDist > 0 && currentDist != 999) {
+        if (currentDist <= mappedDist && currentDist >= mappedDist - 3) {
+          digitalWrite(LED_RED, HIGH);
+          // digitalWrite(LED_YELLOW, HIGH); // เอาคอมเมนต์ออกถ้ายังอยากเทสไฟ 3 ดวง
+          // digitalWrite(LED_GREEN, HIGH);
+        } else {
+          digitalWrite(LED_RED, LOW);
+          // digitalWrite(LED_YELLOW, LOW);
+          // digitalWrite(LED_GREEN, LOW);
+        }
+      } else {
+        digitalWrite(LED_RED, LOW);
+        // digitalWrite(LED_YELLOW, LOW);
+        // digitalWrite(LED_GREEN, LOW);
+      }
+
+      if (savePressed) {
+        savedDist = mappedDist;
+        preferences.putInt("dist", savedDist);
+        display.println("SAVED!");
+      }
+      break;
+    }
+    case SET_TEMP: {
+      int mappedTemp = map(potValue, 4095, 0, 20, 60);
+      display.println("SET TEMP LIMIT");
+      display.print("Saved: "); display.println(savedTemp);
+      display.print("New:   "); display.println(mappedTemp);
+      if (savePressed) {
+        savedTemp = mappedTemp;
+        preferences.putInt("temp", savedTemp);
+        display.println("SAVED!");
+      }
+      break;
+    }
+    case SET_HUM_MIN: {
+      int mappedHumMin = map(potValue, 4095, 0, 20, 50);
+      display.println("SET HUM MIN");
+      display.print("Saved: "); display.println(savedHumMin);
+      display.print("New:   "); display.println(mappedHumMin);
+      if (savePressed) {
+        savedHumMin = mappedHumMin;
+        preferences.putInt("humMin", savedHumMin);
+        display.println("SAVED!");
+      }
+      break;
+    }
+    case SET_HUM_MAX: {
+      int mappedHumMax = map(potValue, 4095, 0, 40, 90);
+      display.println("SET HUM MAX");
+      display.print("Saved: "); display.println(savedHumMax);
+      display.print("New:   "); display.println(mappedHumMax);
+      if (savePressed) {
+        savedHumMax = mappedHumMax;
+        preferences.putInt("humMax", savedHumMax);
+        display.println("SAVED!");
+      }
+      break;
+    }
+    case SET_DELAY: {
+      int mappedDelay = map(potValue, 4095, 0, 0, 60);
+      display.println("SET DELAY (MINS)");
+      display.print("Saved: "); display.println(savedDelayMins);
+      display.print("New:   "); display.println(mappedDelay);
+      if (savePressed) {
+        savedDelayMins = mappedDelay;
+        preferences.putInt("delay", savedDelayMins);
+        display.println("SAVED!");
+      }
+      break;
+    }
+  }
+  display.display();
+}
