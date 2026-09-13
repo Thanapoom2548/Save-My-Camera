@@ -237,9 +237,14 @@ void loop() {
     }
     case SET_TEMP: {
       int mappedTemp = map(potValue, 4095, 0, 20, 60);
-      display.println("SET TEMP LIMIT");
+      display.setCursor(1,0);
+      display.println("---SET TEMP LIMIT---");
+      display.setCursor(8,15);
+      display.setTextSize(2);
       display.print("Saved: "); display.println(savedTemp);
-      display.print("New:   "); display.println(mappedTemp);
+      display.setTextSize(2); 
+      display.setCursor(8,35);
+      display.print("New  : "); display.println(mappedTemp);
       if (savePressed) {
         savedTemp = mappedTemp;
         preferences.putInt("temp", savedTemp);
