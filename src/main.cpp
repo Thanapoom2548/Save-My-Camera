@@ -288,9 +288,14 @@ void loop() {
     }
     case SET_DELAY: {
       int mappedDelay = map(potValue, 4095, 0, 0, 60);
-      display.println("SET DELAY (MINS)");
+      display.setCursor(6,0);
+      display.println("--SET DELAY (MINS)--");
+      display.setCursor(8,15);
+      display.setTextSize(2);
       display.print("Saved: "); display.println(savedDelayMins);
-      display.print("New:   "); display.println(mappedDelay);
+      display.setTextSize(2); 
+      display.setCursor(8,35);
+      display.print("New  : "); display.println(mappedDelay);
       if (savePressed) {
         savedDelayMins = mappedDelay;
         preferences.putInt("delay", savedDelayMins);
