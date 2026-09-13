@@ -67,21 +67,20 @@ void setup() {
   pinMode(LED_GREEN, OUTPUT);
   pinMode(BUZZER_PIN, OUTPUT);
 
+
   dht.begin();
   if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
     for(;;);
   }
-  
+
+  // จากนั้นเปิด Preferences ตามปกติ
   preferences.begin("cabinet", false);
   
-  // *** คำสั่งล้างความจำเก่า ป้องกันค่ารวน (สำคัญมาก) ***
-  preferences.clear(); 
-  
   savedDist = preferences.getInt("dist", 50); 
-  savedTemp = preferences.getInt("temp", 50);     
+  savedTemp = preferences.getInt("temp", 38);     
   savedHumMin = preferences.getInt("humMin", 20); 
-  savedHumMax = preferences.getInt("humMax", 85); 
-  savedDelayMins = preferences.getInt("delay", 1); // ค่าเริ่มต้น 1 นาที
+  savedHumMax = preferences.getInt("humMax", 60); 
+  savedDelayMins = preferences.getInt("delay", 1); 
 }
 
 void loop() {
@@ -243,17 +242,11 @@ void loop() {
       if (currentDist > 0 && currentDist != 999) {
         if (currentDist <= mappedDist && currentDist >= mappedDist - 3) {
           digitalWrite(LED_RED, HIGH);
-          // digitalWrite(LED_YELLOW, HIGH); // เอาคอมเมนต์ออกถ้ายังอยากเทสไฟ 3 ดวง
-          // digitalWrite(LED_GREEN, HIGH);
         } else {
           digitalWrite(LED_RED, LOW);
-          // digitalWrite(LED_YELLOW, LOW);
-          // digitalWrite(LED_GREEN, LOW);
         }
       } else {
         digitalWrite(LED_RED, LOW);
-        // digitalWrite(LED_YELLOW, LOW);
-        // digitalWrite(LED_GREEN, LOW);
       }
 
       if (savePressed) {
