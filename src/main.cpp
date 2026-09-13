@@ -201,10 +201,15 @@ void loop() {
     case SET_DIST: {
 
       int mappedDist = map(potValue, 4095, 0, 10, 100);
-      display.println("SET DISTANCE");
-      display.print("New: "); display.print(mappedDist); 
-      display.print(" (Raw:"); display.print(potValue); display.println(")"); 
-      display.print("Real: "); display.println(currentDist);
+      display.setCursor(5,0);
+      display.println("----SET DISTANCE----");
+      display.setCursor(8,15);
+      display.setTextSize(2);
+      display.print("New  : "); display.print(mappedDist); 
+      //display.print(" (Raw:"); display.print(potValue); display.println(")");
+      display.setTextSize(2); 
+      display.setCursor(8,35);
+      display.print("Real : "); display.println(currentDist);
       
       // ถ้าหมุนตรงระยะ ให้ติดไฟทั้ง 3 ดวงเช็คหลอดขาด
       if (currentDist > 0 && currentDist != 999) {
