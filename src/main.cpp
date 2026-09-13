@@ -127,7 +127,16 @@ void loop() {
     case NORMAL: {
       if (isnan(t) || isnan(h)) {
         digitalWrite(LED_YELLOW, HIGH);
-        display.println("--- SENSOR ERROR ---");
+        display.setTextSize(1);
+        for(int i = 0; i < 3; i++) {
+          display.setCursor(4, 32);
+          display.println("--- SENSOR ERROR ---");
+          display.display();
+          delay(500);
+          display.clearDisplay();
+          display.display();
+          delay(500);
+        }
         display.display();
         return; 
       }
