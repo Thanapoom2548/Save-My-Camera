@@ -161,6 +161,8 @@ void loop() {
           noTone(BUZZER_PIN); digitalWrite(BUZZER_PIN, LOW); 
         }
       }
+      
+      // UI คงเดิมของคุณ
       display.setTextSize(1); display.setCursor(5, 10);
       display.print("Temperature : "); display.print(t, 1); display.println("C");
       display.setTextSize(1); display.setCursor(5, 20);
@@ -180,6 +182,13 @@ void loop() {
            display.print((delayTargetMillis - elapsedMillis) / 1000); display.println(" s");
         } else {
            bool isAlarm = (t >= savedTemp || h >= savedHumMax || h <= savedHumMin);
+           bool isWarning = false;
+           
+           // --- เพิ่มลอจิกเช็คไฟส้ม (Warning) ตรงนี้ ---
+           if (!isAlarm) {
+             if (t >= savedTemp - 2) isWarning = true;
+             if (h >= savedHumMax - 5 || h <= savedHumMin + 5) isWarning = true;
+           }
            
            if (isAlarm) {
              if (savePressed) isMuted = true;
@@ -192,7 +201,7 @@ void loop() {
 
              // นำสถานะมาคุมการแสดงผล (จอ, ไฟ, เสียง)
              if (alarmBlinkState) {
-               digitalWrite(LED_GREEN, LOW); digitalWrite(LED_RED, HIGH);
+               digitalWrite(LED_GREEN, LOW); digitalWrite(LED_YELLOW, LOW); digitalWrite(LED_RED, HIGH);
                if (!isMuted) tone(BUZZER_PIN, 1000); 
                else { noTone(BUZZER_PIN); digitalWrite(BUZZER_PIN, LOW); }
                
@@ -200,29 +209,41 @@ void loop() {
                display.println("! ALARM ACTIVE !");
              } else {
                // จังหวะดับ
-               digitalWrite(LED_GREEN, LOW); digitalWrite(LED_RED, LOW); 
+               digitalWrite(LED_GREEN, LOW); digitalWrite(LED_RED, LOW); digitalWrite(LED_YELLOW, LOW);
                noTone(BUZZER_PIN); digitalWrite(BUZZER_PIN, LOW); 
                
+               display.setCursor(12, 30); // (แก้บัค) ต้องเซ็ตพิกัดก่อนพิมพ์ช่องว่างทับ ไม่งั้นมันจะไปลบผิดบรรทัด
                display.println("                "); 
              }
+             
+           // --- แทรกสถานะ WARNING ไฟส้ม ---
+           } else if (isWarning) {
+             digitalWrite(LED_GREEN, LOW); digitalWrite(LED_RED, LOW); digitalWrite(LED_YELLOW, HIGH);
+             noTone(BUZZER_PIN); digitalWrite(BUZZER_PIN, LOW);
+             display.setCursor(5, 30);
+             display.println("Status    : WARNING");
+             
            } else {
-             digitalWrite(LED_GREEN, HIGH); digitalWrite(LED_RED, LOW);
+             digitalWrite(LED_GREEN, HIGH); digitalWrite(LED_RED, LOW); digitalWrite(LED_YELLOW, LOW);
              noTone(BUZZER_PIN); digitalWrite(BUZZER_PIN, LOW);
              display.setCursor(5, 30);
              display.println("Status      : SAFE");
            }          
         }
-        // คำนวณ ชั่วโมง, นาที, วินาที
+        
+        // คำนวณ วัน, ชั่วโมง, นาที, วินาที
         unsigned long d_time = totalSecs / 86400;
-        unsigned long h_time = totalSecs / 3600;
+        unsigned long h_time = (totalSecs % 86400) / 3600; // แก้สูตรชั่วโมงนิดนึงให้สอดคล้องกับวัน
         unsigned long m_time = (totalSecs % 3600) / 60;
         unsigned long s_time = totalSecs % 60;
+        
         display.setCursor(5, 40);
         display.print("Time  : "); 
         display.printf("%lud %02lu:%02lu:%02lu\n", d_time, h_time, m_time, s_time);
+        
       } else {
         display.setCursor(5, 30);
-        display.println("Status  : NO CAMERA");
+        display.println("Status  : NO CAMERA"); // จัดช่องไฟให้เครื่องหมาย : ตรงกับบรรทัดอื่น
       }
       break;
     }
