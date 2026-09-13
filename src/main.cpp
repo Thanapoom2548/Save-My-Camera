@@ -201,7 +201,7 @@ void loop() {
     case SET_DIST: {
 
       int mappedDist = map(potValue, 4095, 0, 10, 100);
-      display.setCursor(5,0);
+      display.setCursor(3,0);
       display.println("----SET DISTANCE----");
       display.setCursor(8,15);
       display.setTextSize(2);
@@ -237,7 +237,7 @@ void loop() {
     }
     case SET_TEMP: {
       int mappedTemp = map(potValue, 4095, 0, 20, 60);
-      display.setCursor(1,0);
+      display.setCursor(6,0);
       display.println("---SET TEMP LIMIT---");
       display.setCursor(8,15);
       display.setTextSize(2);
@@ -254,7 +254,7 @@ void loop() {
     }
     case SET_HUM_MIN: {
       int mappedHumMin = map(potValue, 4095, 0, 20, 50);
-      display.setCursor(6,0);
+      display.setCursor(7,0);
       display.println("----SET HUM MIN----");
       display.setCursor(8,15);
       display.setTextSize(2);
@@ -271,7 +271,7 @@ void loop() {
     }
     case SET_HUM_MAX: {
       int mappedHumMax = map(potValue, 4095, 0, 40, 90);
-      display.setCursor(6,0);
+      display.setCursor(7,0);
       display.println("----SET HUM MAX----");
       display.setCursor(8,15);
       display.setTextSize(2);
