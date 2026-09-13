@@ -29,6 +29,7 @@ State currentState = NORMAL;
 
 int savedDist, savedTemp, savedHumMin, savedHumMax, savedDelayMins;
 unsigned long cameraDetectedTime = 0;
+unsigned long cameraLostTime = 0;
 bool isCameraInCabinet = false;
 bool isMuted = false;
 
@@ -134,32 +135,36 @@ void loop() {
       int triggerDistance = savedDist - 5; 
 
       if (currentDist <= triggerDistance && currentDist > 0) { 
+        cameraLostTime = millis(); // อัปเดตเวลาล่าสุดที่ยังเจอกล้องอยู่เสมอ
         if (!isCameraInCabinet) {
           isCameraInCabinet = true;
           cameraDetectedTime = millis();
           isMuted = false;
         }
       } else {
-        isCameraInCabinet = false;
-        digitalWrite(LED_GREEN, LOW); digitalWrite(LED_RED, LOW); digitalWrite(LED_YELLOW, LOW);
-        noTone(BUZZER_PIN); digitalWrite(BUZZER_PIN, LOW); 
+        // ให้โอกาส 2 วินาที (2000 ms) ถ้าระยะเกินตู้แค่แวบเดียว เวลาจะไม่รีเซ็ต
+        if (isCameraInCabinet && (millis() - cameraLostTime > 2000)) {
+          isCameraInCabinet = false;
+          digitalWrite(LED_GREEN, LOW); digitalWrite(LED_RED, LOW); digitalWrite(LED_YELLOW, LOW);
+          noTone(BUZZER_PIN); digitalWrite(BUZZER_PIN, LOW); 
+        }
       }
-
-      display.println("VER: 3.0 (RESET)"); // เช็คว่าอัปโหลดติด
-      display.print("T: "); display.print(t, 1); display.print("C  H: "); display.print(h, 1); display.println("%");
+      display.setTextSize(1); display.setCursor(5, 10);
+      display.print("Temperature : "); display.print(t, 1); display.println("C");
+      display.setTextSize(1); display.setCursor(5, 20);
+      display.print("Humidity    : "); display.print(h, 1); display.println("%");
       
       if (isCameraInCabinet) {
         unsigned long elapsedMillis = millis() - cameraDetectedTime;
         unsigned long delayTargetMillis = savedDelayMins * 60000UL;
         
         unsigned long totalSecs = elapsedMillis / 1000;
-        display.print("Time: "); display.print(totalSecs / 60); display.print("m "); 
-        display.print(totalSecs % 60); display.println("s");
 
         if (elapsedMillis < delayTargetMillis) {
            digitalWrite(LED_GREEN, HIGH);
-           noTone(BUZZER_PIN); digitalWrite(BUZZER_PIN, LOW); // บังคับดับเสียงชัวร์ๆ
-           display.print("Delay: ");
+           noTone(BUZZER_PIN); digitalWrite(BUZZER_PIN, LOW); // บังคับดับเสียงชัวร์
+           display.setCursor(5, 30);
+           display.print("Delay       : ");
            display.print((delayTargetMillis - elapsedMillis) / 1000); display.println(" s");
         } else {
            bool isAlarm = (t >= savedTemp || h >= savedHumMax || h <= savedHumMin);
@@ -170,21 +175,31 @@ void loop() {
              
              if (!isMuted) tone(BUZZER_PIN, 1000); 
              else { noTone(BUZZER_PIN); digitalWrite(BUZZER_PIN, LOW); }
-             
+             display.setCursor(15, 30);
              display.println("! ALARM ACTIVE !");
            } else {
              digitalWrite(LED_GREEN, HIGH); digitalWrite(LED_RED, LOW);
              noTone(BUZZER_PIN); digitalWrite(BUZZER_PIN, LOW);
-             display.println("Status: SAFE");
-           }
+             display.setCursor(5, 30);
+             display.println("Status      : SAFE");
+           }          
         }
+        // คำนวณ ชั่วโมง, นาที, วินาที
+        unsigned long d_time = totalSecs / 86400;
+        unsigned long h_time = totalSecs / 3600;
+        unsigned long m_time = (totalSecs % 3600) / 60;
+        unsigned long s_time = totalSecs % 60;
+        display.setCursor(5, 40);
+        display.print("Time  : "); 
+        display.printf("%lud %02lu:%02lu:%02lu\n", d_time, h_time, m_time, s_time);
       } else {
-        display.println("Status: NO CAMERA");
+        display.setCursor(5, 30);
+        display.println("Status  : NO CAMERA");
       }
       break;
     }
     case SET_DIST: {
-      // แก้ 4095 ลงมา 0 เพื่อให้หมุนขวา = เพิ่มขึ้น
+
       int mappedDist = map(potValue, 4095, 0, 10, 100);
       display.println("SET DISTANCE");
       display.print("New: "); display.print(mappedDist); 
