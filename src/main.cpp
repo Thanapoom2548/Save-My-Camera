@@ -254,9 +254,14 @@ void loop() {
     }
     case SET_HUM_MIN: {
       int mappedHumMin = map(potValue, 4095, 0, 20, 50);
-      display.println("SET HUM MIN");
+      display.setCursor(6,0);
+      display.println("----SET HUM MIN----");
+      display.setCursor(8,15);
+      display.setTextSize(2);
       display.print("Saved: "); display.println(savedHumMin);
-      display.print("New:   "); display.println(mappedHumMin);
+      display.setTextSize(2); 
+      display.setCursor(8,35);
+      display.print("New  : "); display.println(mappedHumMin);
       if (savePressed) {
         savedHumMin = mappedHumMin;
         preferences.putInt("humMin", savedHumMin);
