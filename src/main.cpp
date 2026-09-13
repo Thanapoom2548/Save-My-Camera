@@ -271,9 +271,14 @@ void loop() {
     }
     case SET_HUM_MAX: {
       int mappedHumMax = map(potValue, 4095, 0, 40, 90);
-      display.println("SET HUM MAX");
+      display.setCursor(6,0);
+      display.println("----SET HUM MAX----");
+      display.setCursor(8,15);
+      display.setTextSize(2);
       display.print("Saved: "); display.println(savedHumMax);
-      display.print("New:   "); display.println(mappedHumMax);
+      display.setTextSize(2); 
+      display.setCursor(8,35);
+      display.print("New  : "); display.println(mappedHumMax);
       if (savePressed) {
         savedHumMax = mappedHumMax;
         preferences.putInt("humMax", savedHumMax);
