@@ -39,6 +39,9 @@ bool lastModeState = HIGH;
 bool lastSaveState = HIGH;
 const int debounceDelay = 50;
 
+unsigned long lastAlarmBlink = 0;
+bool alarmBlinkState = false;
+
 unsigned long lastPingTime = 0;
 long currentDist = 999;
 
@@ -179,13 +182,29 @@ void loop() {
            bool isAlarm = (t >= savedTemp || h >= savedHumMax || h <= savedHumMin);
            
            if (isAlarm) {
-             digitalWrite(LED_GREEN, LOW); digitalWrite(LED_RED, HIGH);
              if (savePressed) isMuted = true;
-             
-             if (!isMuted) tone(BUZZER_PIN, 1000); 
-             else { noTone(BUZZER_PIN); digitalWrite(BUZZER_PIN, LOW); }
-             display.setCursor(15, 30);
-             display.println("! ALARM ACTIVE !");
+
+             // ลอจิกกระพริบ: สลับสถานะทุกๆ 500 ms (0.5 วินาที)
+             if (millis() - lastAlarmBlink >= 500) {
+               lastAlarmBlink = millis();
+               alarmBlinkState = !alarmBlinkState; // สลับค่า true/false
+             }
+
+             // นำสถานะมาคุมการแสดงผล (จอ, ไฟ, เสียง)
+             if (alarmBlinkState) {
+               digitalWrite(LED_GREEN, LOW); digitalWrite(LED_RED, HIGH);
+               if (!isMuted) tone(BUZZER_PIN, 1000); 
+               else { noTone(BUZZER_PIN); digitalWrite(BUZZER_PIN, LOW); }
+               
+               display.setCursor(12, 30);
+               display.println("! ALARM ACTIVE !");
+             } else {
+               // จังหวะดับ
+               digitalWrite(LED_GREEN, LOW); digitalWrite(LED_RED, LOW); 
+               noTone(BUZZER_PIN); digitalWrite(BUZZER_PIN, LOW); 
+               
+               display.println("                "); 
+             }
            } else {
              digitalWrite(LED_GREEN, HIGH); digitalWrite(LED_RED, LOW);
              noTone(BUZZER_PIN); digitalWrite(BUZZER_PIN, LOW);
