@@ -161,6 +161,8 @@ void loop() {
         }
       }
       
+      display.setCursor(0, 0);
+      display.drawRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, WHITE);
       display.setTextSize(1); display.setCursor(5, 10);
       display.print("Temperature : "); display.print(t, 1); display.println("C");
       display.setTextSize(1); display.setCursor(5, 20);
@@ -230,7 +232,7 @@ void loop() {
         
         // คำนวณ วัน, ชั่วโมง, นาที, วินาที
         unsigned long d_time = totalSecs / 86400;
-        unsigned long h_time = (totalSecs % 86400) / 3600; // แก้สูตรชั่วโมงนิดนึงให้สอดคล้องกับวัน
+        unsigned long h_time = (totalSecs % 86400) / 3600; 
         unsigned long m_time = (totalSecs % 3600) / 60;
         unsigned long s_time = totalSecs % 60;
         
@@ -240,7 +242,7 @@ void loop() {
         
       } else {
         display.setCursor(5, 30);
-        display.println("Status  : NO CAMERA"); // จัดช่องไฟให้เครื่องหมาย : ตรงกับบรรทัดอื่น
+        display.println("Status  : NO CAMERA");
       }
       break;
     }
