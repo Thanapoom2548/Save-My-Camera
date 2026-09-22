@@ -13,6 +13,39 @@
   - เสียงเตือนผ่าน Buzzer (พร้อมฟังก์ชันกดปุ่มเพื่อ Mute ปิดเสียงชั่วคราว)
 - **📦 เคส 3D Print ออกแบบเฉพาะ:** กล่องขนาดกะทัดรัดที่ออกแบบมาสำหรับการพิมพ์ 3D (ปรับระยะเผื่อให้เหมาะกับเส้นวัสดุ PETG โดยเฉพาะ)
 
+## 📌 Block Diagram 
+
+```mermaid
+flowchart TB
+    subgraph Node1 ["Node 1: Transmitter (ในตู้กันชื้น)"]
+        direction TB
+        POT["Potentiometer"] -->|Analog ADC (GPIO 35)| ESP1["ESP32 Core (Node 1)"]
+        BTN["Push Buttons (Mode/Save)"] -->|GPIO Control (18, 19)| ESP1
+        DHT["DHT11 (Temp & Hum)"] -->|Data Pin (GPIO 4)| ESP1
+        
+        ESP1 -->|TRIG / ECHO| US["Ultrasonic HC-SR04 (33, 34)"]
+        ESP1 -->|I2C Bus (21, 22)| OLED1["OLED Display 0.96 inch"]
+        ESP1 -->|Alert Pins (25, 26, 27)| LED["LED Indicators (R/Y/G)"]
+        ESP1 -->|Alarm Pin (GPIO 14)| BUZZ1["Buzzer Driver"]
+    end
+
+    subgraph Node2 ["Node 2: Receiver (บนโต๊ะทำงาน)"]
+        direction TB
+        ESP2["ESP32 Core (Node 2)"] -->|I2C Bus| OLED2["OLED Display (Monitor)"]
+        ESP2 -->|Alert Pin| BUZZ2["Buzzer Driver"]
+    end
+
+    ESP1 ==>|Wi-Fi SoftAP / HTTP & UDP| ESP2
+
+    classDef mcu fill:#1f77b4,stroke:#fff,stroke-width:2px,color:#fff;
+    classDef sensor fill:#2ca02c,stroke:#fff,stroke-width:1px,color:#fff;
+    classDef display fill:#ff7f0e,stroke:#fff,stroke-width:1px,color:#fff;
+
+    class ESP1,ESP2 mcu;
+    class POT,BTN,DHT,US sensor;
+    class OLED1,OLED2,LED,BUZZ1,BUZZ2 display;
+```
+
 ## 🛠️ อุปกรณ์ที่ต้องใช้ (Hardware Requirements)
 
 - **ไมโครคอนโทรลเลอร์:** ESP32 DOIT DevKit V1
