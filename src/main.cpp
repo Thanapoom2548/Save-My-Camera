@@ -73,7 +73,6 @@ void setup() {
     for(;;);
   }
 
-  // จากนั้นเปิด Preferences ตามปกติ
   preferences.begin("cabinet", false);
   
   savedDist = preferences.getInt("dist", 50); 
@@ -96,6 +95,7 @@ void loop() {
       delay(200);
     }
   }
+
   lastModeState = readingMode;
 
   // ปุ่ม Save
@@ -153,7 +153,7 @@ void loop() {
           isMuted = false;
         }
       } else {
-        // ให้โอกาส 2 วินาที (2000 ms) ถ้าระยะเกินตู้แค่แวบเดียว เวลาจะไม่รีเซ็ต
+  
         if (isCameraInCabinet && (millis() - cameraLostTime > 2000)) {
           isCameraInCabinet = false;
           digitalWrite(LED_GREEN, LOW); digitalWrite(LED_RED, LOW); digitalWrite(LED_YELLOW, LOW);
@@ -161,7 +161,6 @@ void loop() {
         }
       }
       
-      // UI คงเดิมของคุณ
       display.setTextSize(1); display.setCursor(5, 10);
       display.print("Temperature : "); display.print(t, 1); display.println("C");
       display.setTextSize(1); display.setCursor(5, 20);
@@ -175,7 +174,7 @@ void loop() {
 
         if (elapsedMillis < delayTargetMillis) {
            digitalWrite(LED_GREEN, HIGH);
-           noTone(BUZZER_PIN); digitalWrite(BUZZER_PIN, LOW); // บังคับดับเสียงชัวร์
+           noTone(BUZZER_PIN); digitalWrite(BUZZER_PIN, LOW); 
            display.setCursor(5, 30);
            display.print("Delay       : ");
            display.print((delayTargetMillis - elapsedMillis) / 1000); display.println(" s");
@@ -183,7 +182,6 @@ void loop() {
            bool isAlarm = (t >= savedTemp || h >= savedHumMax || h <= savedHumMin);
            bool isWarning = false;
            
-           // --- เพิ่มลอจิกเช็คไฟส้ม (Warning) ตรงนี้ ---
            if (!isAlarm) {
              if (t >= savedTemp - 2) isWarning = true;
              if (h >= savedHumMax - 5 || h <= savedHumMin + 5) isWarning = true;
@@ -211,7 +209,7 @@ void loop() {
                digitalWrite(LED_GREEN, LOW); digitalWrite(LED_RED, LOW); digitalWrite(LED_YELLOW, LOW);
                noTone(BUZZER_PIN); digitalWrite(BUZZER_PIN, LOW); 
                
-               display.setCursor(12, 30); // (แก้บัค) ต้องเซ็ตพิกัดก่อนพิมพ์ช่องว่างทับ ไม่งั้นมันจะไปลบผิดบรรทัด
+               display.setCursor(12, 30); 
                display.println("                "); 
              }
              
@@ -249,8 +247,8 @@ void loop() {
     case SET_DIST: {
 
       int mappedDist = map(potValue, 4095, 0, 10, 100);
-      display.setCursor(3,0);
-      display.println("----SET DISTANCE----");
+      display.setCursor(7,0);
+      display.println("-SET DISTANCE (CM)-");
       display.setCursor(8,15);
       display.setTextSize(2);
       display.print("New  : "); display.print(mappedDist); 
@@ -279,8 +277,8 @@ void loop() {
     }
     case SET_TEMP: {
       int mappedTemp = map(potValue, 4095, 0, 20, 60);
-      display.setCursor(6,0);
-      display.println("---SET TEMP LIMIT---");
+      display.setCursor(10,0);
+      display.println("SET TEMP LIMIT (C)");
       display.setCursor(8,15);
       display.setTextSize(2);
       display.print("Saved: "); display.println(savedTemp);
@@ -297,7 +295,7 @@ void loop() {
     case SET_HUM_MIN: {
       int mappedHumMin = map(potValue, 4095, 0, 20, 50);
       display.setCursor(7,0);
-      display.println("----SET HUM MIN----");
+      display.println("--SET HUM MIN (%)--");
       display.setCursor(8,15);
       display.setTextSize(2);
       display.print("Saved: "); display.println(savedHumMin);
@@ -314,7 +312,7 @@ void loop() {
     case SET_HUM_MAX: {
       int mappedHumMax = map(potValue, 4095, 0, 40, 90);
       display.setCursor(7,0);
-      display.println("----SET HUM MAX----");
+      display.println("--SET HUM MAX (%)--");
       display.setCursor(8,15);
       display.setTextSize(2);
       display.print("Saved: "); display.println(savedHumMax);
