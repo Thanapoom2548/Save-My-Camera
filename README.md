@@ -1,6 +1,10 @@
-# 🛡️ ระบบเฝ้าระวังและแจ้งเตือนตู้กันชื้น (Save My Camera)
+<img width="883" height="58" alt="image" src="https://github.com/user-attachments/assets/86272d40-f098-460f-a343-43f7d33454bc" /># 🛡️ ระบบเฝ้าระวังและแจ้งเตือนตู้กันชื้น (Save My Camera)
 
-ระบบตรวจสอบตู้กันชื้นอัจฉริยะที่สร้างด้วย **ESP32** โปรเจกต์นี้ช่วยให้คุณตรวจสอบอุณหภูมิและความชื้นของตู้เก็บกล้อง ตรวจจับว่ามีกล้องวางอยู่ข้างในหรือไม่ด้วยเซ็นเซอร์อัลตราโซนิก และแจ้งเตือนดสถานะด้วย (ไฟ LED) (จอ OLED)และเสียง (Buzzer) เมื่อสภาพแวดล้อมเกินค่าความปลอดภัยที่คุณตั้งไว้
+ระบบตรวจสอบตู้กันชื้นอัจฉริยะที่สร้างด้วย **ESP32** โปรเจกต์นี้ช่วยให้ตรวจสอบอุณหภูมิและความชื้นของตู้เก็บกล้อง ตรวจจับว่ามีกล้องวางอยู่ข้างในหรือไม่ด้วยเซ็นเซอร์อัลตราโซนิก และแจ้งเตือนดสถานะด้วย (ไฟ LED) (จอ OLED)และเสียง (Buzzer) เมื่อสภาพแวดล้อมเกินค่าความปลอดภัยที่ตั้งไว้
+
+## 📑 เอกสารและคู่มือการใช้งาน (Documentation & Manual)
+
+- 📖 [คลิกเพื่อดูคู่มือการใช้งาน (Save My Camera)](https://sway.cloud.microsoft/RhiMDbVuny8xtQOC?ref=Link)
 
 ## ✨ ฟีเจอร์หลัก (Features)
 
@@ -11,7 +15,6 @@
 - **🚨 ระบบแจ้งเตือนอัจฉริยะ:** 
   - ไฟแสดงสถานะ 3 สี (เขียว = ปลอดภัย, เหลือง = ขัดข้อง, แดง = แจ้งเตือน)
   - เสียงเตือนผ่าน Buzzer (พร้อมฟังก์ชันกดปุ่มเพื่อ Mute ปิดเสียงชั่วคราว)
-- **📦 เคส 3D Print ออกแบบเฉพาะ:** กล่องขนาดกะทัดรัดที่ออกแบบมาสำหรับการพิมพ์ 3D (ปรับระยะเผื่อให้เหมาะกับเส้นวัสดุ PETG โดยเฉพาะ)
 
 ## 📌 Block Diagram 
 
@@ -52,6 +55,10 @@ flowchart LR
     class NVS storage;
 ```
 
+## 🔀 ผังงานการทำงาน (Flowchart)
+
+![Flowchart ของระบบ](https://i.postimg.cc/Wp7kSD4Z/Microcontroller-Flowchart-drawio.png)
+
 ## 🛠️ อุปกรณ์ที่ต้องใช้ (Hardware Requirements)
 
 - **ไมโครคอนโทรลเลอร์:** ESP32 DOIT DevKit V1
@@ -66,6 +73,15 @@ flowchart LR
   - 3x หลอด LED (แดง, เหลือง, เขียว)
   - 1x Buzzer
 
+### 📋 รายการเอกสารทางเทคนิค (Component Datasheets)
+
+| อุปกรณ์ (Component) | เอกสารอ้างอิง (Datasheet) |
+| :--- | :--- |
+| **ESP32 DOIT DevKit V1** | [ESP32 Datasheet](https://docs.espressif.com/projects/esp-dev-kits/en/latest/esp32/esp-dev-kits-en-master-esp32.pdf) |
+| **0.96" OLED Display** | [SSD1306 Datasheet](https://e2e.ti.com/cfs-file/__key/communityserver-discussions-components-files/791/SSD1306-Datasheet-for-096-OLED-_2800_1_2900_.pdf) |
+| **DHT11 Sensor** | [DHT11 Datasheet](https://moodle.upm.es/en-abierto/pluginfile.php/47163/mod_page/content/10/DHT11.PDF) |
+| **HC-SR04 Ultrasonic** | [HC-SR04 Datasheet](https://www.alldatasheet.com/datasheet-pdf/view/1132204/ETC2/HCSR04.html) |
+
 ## 🔌 การต่อสาย (Pin Configuration)
 
 | อุปกรณ์ (Component) | ขา ESP32 (Pin) | หมายเหตุ (Note) |
@@ -78,10 +94,14 @@ flowchart LR
 | **Potentiometer**| GPIO 35 | พอร์ต Analog Input |
 | **ปุ่ม Mode** | GPIO 18 | เปิด `INPUT_PULLUP` (ต่อขาเข้า GND) |
 | **ปุ่ม Save** | GPIO 19 | เปิด `INPUT_PULLUP` (ต่อขาเข้า GND) |
-| **ไฟ LED แดง** | GPIO 25 | ต่อผ่านตัวต้านทาน 220Ω |
-| **ไฟ LED เหลือง** | GPIO 26 | ต่อผ่านตัวต้านทาน 220Ω |
-| **ไฟ LED เขียว** | GPIO 27 | ต่อผ่านตัวต้านทาน 220Ω |
+| **ไฟ LED แดง** | GPIO 25 | ต่อผ่านตัวต้านทาน 330Ω |
+| **ไฟ LED เหลือง** | GPIO 26 | ต่อผ่านตัวต้านทาน 330Ω |
+| **ไฟ LED เขียว** | GPIO 27 | ต่อผ่านตัวต้านทาน 330 |
 | **Buzzer** | GPIO 14 | |
+
+### 📐 แผนภาพการต่อวงจร (Circuit Diagram)
+
+![แผนภาพการต่อวงจร Circuit Diagram](https://i.postimg.cc/3xhpZgXn/Add-a-subheading.png)
 
 ## 💻 ซอฟต์แวร์และไลบรารี (Software & Libraries)
 
@@ -108,10 +128,4 @@ flowchart LR
 - **หน้าที่ 4 - ตั้งความชื้นสูงสุด (Set Hum Max):** หมุนปรับค่าความชื้นสูงสุด (%) เพื่อป้องกันความชื้นสะสมที่อาจก่อให้เกิดเชื้อรา
 - **หน้าที่ 5 - ตั้งเวลาหน่วง (Set Delay):** หมุนปรับเวลา (นาที) เพื่อชะลอการแจ้งเตือนหลังจากเพิ่งนำกล้องใส่ตู้ เพื่อให้ระบบดูดความชื้นได้ทำงานและปรับสภาพอากาศให้เข้าที่ก่อนเริ่มเฝ้าระวัง
 
-*💡 **ข้อควรระวัง:** เมื่อหมุนปรับตัวเลขจนได้ค่าที่ต้องการแล้ว **คุณต้องกดปุ่มขวา (Save) 1 ครั้ง** เพื่อบันทึกค่าลงหน่วยความจำด้วย หากกดปุ่มซ้ายผ่านไปเลย ระบบจะไม่จำค่าใหม่และกลับไปใช้ค่าเดิม*
-
-## 🚀 การติดตั้งและการใช้งาน (Installation & Setup)
-
-1. Clone repository นี้:
-   ```bash
-   git clone [https://github.com/Thanapoom2548/Save-My-Camera.git](https://github.com/Thanapoom2548/Save-My-Camera.git)
+*💡 **ข้อควรระวัง:** เมื่อหมุนปรับตัวเลขจนได้ค่าที่ต้องการแล้ว **ต้องกดปุ่มขวา (Save) 1 ครั้ง** เพื่อบันทึกค่าลงหน่วยความจำด้วย หากกดปุ่มซ้ายผ่านไปเลย ระบบจะไม่จำค่าใหม่และกลับไปใช้ค่าเดิม*
