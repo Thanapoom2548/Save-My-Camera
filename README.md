@@ -68,6 +68,22 @@ flowchart LR
 - **เอาต์พุต (Outputs):**
   - 3x หลอด LED (แดง, เหลือง, เขียว)
   - 1x Buzzer
+ 
+### 📦 โครงสร้างและการออกแบบกล่องอุปกรณ์ (3D Model Design)
+
+| มุมมองด้านหน้า (Front View) | มุมมองแบบ Perspective (Perspective View) |
+| :---: | :---: |
+| <img src="https://i.postimg.cc/Nj9McTNP/Assembly-Front.png" width="460" alt="Front View" /> | <img src="https://i.postimg.cc/wjyvpJWf/Assembly-Per.png" width="460" alt="Perspective View" /> |
+
+### 📸 ภาพชิ้นงานและการติดตั้งจริง (Actual Device & Implementation)
+
+| ชิ้นงานภายนอก 1 (External Unit) | ชิ้นงานภายนอก 2 (External Unit) |
+| :---: | :---: |
+| <img src="https://i.postimg.cc/Y0BrMyPK/IMG-20260926-005748.jpg" width="460" alt="Assembled Hardware 1" /> | <img src="https://i.postimg.cc/PJnXTF7T/IMG-20260926-005811.jpg" width="460" alt="Assembled Hardware 2" /> |
+
+| ชิ้นงานภายในกล่องกันชื้น 1 (Internal Sensing Unit) | ชิ้นงานภายในกล่องกันชื้น 2 (Internal Sensing Unit) |
+| :---: | :---: |
+| <img src="URL_รูปเซ็นเซอร์ด้านในตู้1" width="460" alt="Internal Sensing Unit 1" /> | <img src="URL_รูปเซ็นเซอร์ด้านในตู้2" width="460" alt="Internal Sensing Unit 2" /> |
 
 ### 📋 รายการเอกสารทางเทคนิค (Component Datasheets)
 
@@ -139,6 +155,6 @@ flowchart LR
 - **หน้าที่ 4 - ตั้งความชื้นสูงสุด (Set Humi Max):** กำหนดค่าความชื้นสัมพัทธ์สูงสุด (%) ป้องกันการเกิดเชื้อรา
 - **หน้าที่ 5 - ตั้งเวลาหน่วง (Set Delay):** กำหนดระยะเวลา (นาที) เพื่อชะลอการแจ้งเตือน ให้ตัวดูดความชื้นปรับสภาพอากาศหลังปิดตู้
 
-## 📑 เอกสารและคู่มือการใช้งาน (Documentation & Manual)
+## 📑 เอกสาร (Documentation)
 
-- 📖 [คลิกเพื่อดูคู่มือการใช้งาน (Save My Camera - Microsoft Sway)](https://sway.cloud.microsoft/RhiMDbVuny8xtQOC?ref=Link)
+- 📖 [คลิกเพื่อดูเอกสาร (Save My Camera)](https://sway.cloud.microsoft/RhiMDbVuny8xtQOC?ref=Link)
