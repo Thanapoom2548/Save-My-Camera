@@ -155,6 +155,13 @@ flowchart LR
 | :---: | :---: |
 | <img src="https://i.postimg.cc/WpC2mSY5/IMG-20260926-172735.jpg" width="460" alt="Internal Sensing Unit 1" /> | <img src="https://i.postimg.cc/gcQYy4t7/IMG-20260926-172752.jpg" width="460" alt="Internal Sensing Unit 2" /> |
 
+## 🎥 วิดีโอสาธิตการทำงาน (Video Demonstration)
+
+https://github.com/user-attachments/assets/307a79fa-1d68-4e1c-8d24-c2332c993d24
+
+---
+
+
 ## 📑 เอกสาร (Documentation)
 
 - 📖 [คลิกเพื่อดูเอกสาร (Save My Camera)](https://sway.cloud.microsoft/RhiMDbVuny8xtQOC?ref=Link)
